@@ -137,6 +137,34 @@ export const apiSlice = createApi({
         body,
       }),
     }),
+    addAdmin: builder.mutation({
+      query: (body) => ({
+        url: "/api/admin/create-admin",
+        method: "POST",
+        body,
+      }),
+    }),
+    getAllAdmins: builder.query({
+      query: () => ({
+        url: "/api/admin/get-all-admins",
+        method: "GET",
+      }),
+    }),
+    /* checkin-child/:id */
+    checkinChild: builder.mutation({
+      query: ({ body, id }) => ({
+        url: `/api/children/checkin-child/${id}`,
+        method: "POST",
+        body,
+      }),
+    }),
+    /* /checkout-child/:id*/
+    checkoutChild: builder.mutation({
+      query: ({ id }) => ({
+        url: `/api/children/checkout-child/${id}`,
+        method: "POST",
+      }),
+    }),
   }),
 });
 
@@ -158,4 +186,8 @@ export const {
   useGetParentByTokenQuery,
   useGetParentMutation,
   useAddParentWithPasswordMutation,
+  useAddAdminMutation,
+  useGetAllAdminsQuery,
+  useCheckinChildMutation,
+  useCheckoutChildMutation,
 } = apiSlice;

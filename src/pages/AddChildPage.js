@@ -20,6 +20,9 @@ import axios from "axios";
 
 const AddChildPage = ({ navigateTo, context }) => {
   const [childName, setChildName] = useState("");
+  const defaultParentId = new URLSearchParams(window.location.search).get(
+    "parentId"
+  );
   const [imageSrc, setImageSrc] = useState(null); // Stores captured image data URL (e.g., "data:image/png;base64,...")
   const [stream, setStream] = useState(null);
   const [cameraError, setCameraError] = useState(null);
@@ -39,7 +42,15 @@ const AddChildPage = ({ navigateTo, context }) => {
         audio: false,
       });
       setStream(mediaStream);
-      if (videoRef.current) videoRef.current.srcObject = mediaStream;
+      //if (videoRef.current) videoRef.current.srcObject = mediaStream;
+      const setVideoStream = () => {
+        if (videoRef.current) {
+          videoRef.current.srcObject = mediaStream;
+        } else {
+          setTimeout(setVideoStream, 100); // retry after 100ms
+        }
+      };
+      setVideoStream();
     } catch (err) {
       console.error("Cam err:", err);
       setCameraError("Cam access denied/failed.");
@@ -93,7 +104,10 @@ const AddChildPage = ({ navigateTo, context }) => {
       const registerForm = new FormData();
       registerForm.append("image", imageSrc ? imageBlob : null); // Use Blob for image
       registerForm.append("childName", childName); // تأكد أن "name" موجود في الفورم
-      registerForm.append("parentId", parent._id);
+      registerForm.append(
+        "parentId",
+        defaultParentId ? defaultParentId : parent._id
+      );
 
       const resData = await axios.post(
         `${process.env.REACT_APP_BASE_URL_REGISTER_CHILD}/register-child`,
@@ -113,7 +127,7 @@ const AddChildPage = ({ navigateTo, context }) => {
 
       const resPhoto = await addChildren({
         body: formData,
-        id: parent._id,
+        id: defaultParentId ? defaultParentId : parent._id,
       });
 
       if ("error" in resPhoto) {
@@ -198,6 +212,7 @@ const AddChildPage = ({ navigateTo, context }) => {
               playsInline
               className="w-full h-full object-cover"
               muted
+              style={{ display: stream && !imageSrc ? "block" : "none" }}
             ></video>
           )}
           {imageSrc && (

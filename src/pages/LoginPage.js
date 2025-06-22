@@ -3,7 +3,7 @@ import React from "react";
 import { motion } from "framer-motion";
 import Button from "../components/Button";
 import { itemVariants, pageTransitionVariants } from "../animations/variants";
-import { KeyRound, Home, ArrowLeft } from "lucide-react"; // Icons for this page
+import { KeyRound, Home } from "lucide-react"; // Icons for this page
 import {
   useLoginMutation,
   useLoginParentMutation,
@@ -12,10 +12,17 @@ import { useDispatch } from "react-redux";
 import toast from "react-hot-toast";
 import { setParent } from "../redux/feature/parentSlice";
 import { useForm } from "react-hook-form";
+import { setUser } from "../redux/feature/userSlice";
 
 const LoginPage = ({ navigateTo }) => {
-  const [loginParent] = useLoginParentMutation();
+  const [loginParent, { isLoading: isLoadingParent }] =
+    useLoginParentMutation();
+  const [loginAdmin, { isLoading: isLoadingAdmin }] = useLoginMutation();
   const dispatch = useDispatch();
+  const isAdminText = new URLSearchParams(window.location.search).get(
+    "isAdmin"
+  );
+  const isAdmin = isAdminText === "true";
 
   const { handleSubmit, register } = useForm({
     defaultValues: {
@@ -27,14 +34,19 @@ const LoginPage = ({ navigateTo }) => {
 
   const onSubmit = async (data) => {
     try {
-      const res = await loginParent(data);
+      const res = isAdmin ? await loginAdmin(data) : await loginParent(data);
       if ("error" in res) toast.error(res.error.data.message);
 
       if ("data" in res) {
         localStorage.setItem("token", res.data.token);
         toast.success("Login successful");
-        dispatch(setParent(res.data.parent));
-        navigateTo("profile");
+        if (isAdmin) {
+          dispatch(setUser(res.data.parent));
+          navigateTo("adminDashboard");
+        } else {
+          dispatch(setParent(res.data.parent));
+          navigateTo("profile");
+        }
       }
     } catch (error) {
       console.log(error);
@@ -97,17 +109,20 @@ const LoginPage = ({ navigateTo }) => {
           onClick={handleSubmit(onSubmit)}
           className="w-full bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg hover:shadow-blue-500/50 hover:scale-105 transition-all duration-300 text-lg py-3 flex items-center justify-center gap-3 rounded-lg"
         >
-          <KeyRound className="w-6 h-6" /> Sign In
+          <KeyRound className="w-6 h-6" />
+          {isLoadingAdmin || isLoadingParent ? "Logging in..." : "Login"}
         </Button>
-        <p className="text-sm text-gray-400">
-          Don't have an account?{" "}
-          <button
-            onClick={() => navigateTo("register")}
-            className="font-medium text-purple-400 hover:text-purple-300 underline bg-transparent border-none p-0 cursor-pointer"
-          >
-            Register here
-          </button>
-        </p>
+        {!isAdmin && (
+          <p className="text-sm text-gray-400">
+            Don't have an account?{" "}
+            <button
+              onClick={() => navigateTo("register")}
+              className="font-medium text-purple-400 hover:text-purple-300 underline bg-transparent border-none p-0 cursor-pointer"
+            >
+              Register here
+            </button>
+          </p>
+        )}
       </motion.div>
       <motion.div variants={itemVariants} className="mt-12">
         <Button

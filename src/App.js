@@ -1,6 +1,6 @@
 // src/App.js
 import React, { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import {
   Info,
   CheckCircle2,
@@ -22,6 +22,7 @@ import AdminPreLoginPage from "./pages/AdminPreLoginPage";
 import AdminDashboardPage from "./pages/AdminDashboardPage";
 import AddChildPage from "./pages/AddChildPage";
 import ViewEmployeesPage from "./pages/ViewEmployeesPage";
+import VerifiedEmail from "./components/VerifiedEmail";
 
 // Import Shared Components
 import Button from "./components/Button";
@@ -32,7 +33,13 @@ import {
 } from "./redux/services/apiSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { logout, setUser } from "./redux/feature/userSlice";
-import { Link, Route, Routes, useLocation, useNavigate } from "react-router-dom";
+import {
+  Link,
+  Route,
+  Routes,
+  useLocation,
+  useNavigate,
+} from "react-router-dom";
 import { logoutParent, setParent } from "./redux/feature/parentSlice";
 
 const navLinks = [
@@ -283,6 +290,7 @@ const KidSecureApp = () => {
           path="/viewEmployees"
           element={<ViewEmployeesPage navigateTo={navigateTo} />}
         />
+        <Route path="/verify/:id" element={<VerifiedEmail />} />
         {/* Add more routes as needed */}
         <Route path="*" element={<OverviewPage navigateTo={navigateTo} />} />
       </Routes>

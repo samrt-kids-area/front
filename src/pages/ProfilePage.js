@@ -19,9 +19,7 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 import { logout } from "../redux/feature/userSlice";
 import { logoutParent } from "../redux/feature/parentSlice";
-
-const MAX_ALERT_COUNT = 3;
-const ALERT_INTERVAL_MS = 1000; // 5 minutes
+import Timer from "../components/Timer";
 
 const ProfilePage = ({ navigateTo }) => {
   const [timeLeft, setTimeLeft] = useState(15 * 60);
@@ -30,7 +28,7 @@ const ProfilePage = ({ navigateTo }) => {
   const [isTemperatureAlertOpen, setIsTemperatureAlertOpen] = useState(false);
   const { parent, isLoading } = useSelector((state) => state.parent); // Assuming parent data is stored in Redux
   const dispatch = useDispatch();
-  const alertShownCountRef = useRef(0);
+  const [isMQTAlertOpen, setIsMQTAlertOpen] = useState(false);
 
   /* iot */
 
@@ -75,21 +73,23 @@ const ProfilePage = ({ navigateTo }) => {
     if (environmentalData.temperature >= "30") setHasAlertBeenShown(true);
   }, [environmentalData.temperature]); */
   useEffect(() => {
-    const intervalId = setInterval(() => {
-      // Check temperature threshold
+    setInterval(() => {
       if (
         environmentalData.temperature >=
         process.env.REACT_APP_TEMPERATURE_ALERT_THRESHOLD
       ) {
-        if (alertShownCountRef.current < MAX_ALERT_COUNT) {
-          setIsTemperatureAlertOpen(true);
-          alertShownCountRef.current += 1;
-        }
+        setIsTemperatureAlertOpen(true);
       }
-    }, ALERT_INTERVAL_MS);
-
-    return () => clearInterval(intervalId); // cleanup
+    }, 8000);
   }, [environmentalData.temperature]);
+
+  useEffect(() => {
+    setInterval(() => {
+      if (environmentalData.mq2 >= process.env.REACT_APP_MQT_ALERT_THRESHOLD) {
+        setIsMQTAlertOpen(true);
+      }
+    }, 12000);
+  }, [environmentalData.mq2]);
 
   useEffect(() => {
     if (timeLeft === 0) return;
@@ -114,6 +114,13 @@ const ProfilePage = ({ navigateTo }) => {
       </div>
     );
   }
+  if (!parent) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <p className="text-gray-300">No parent data found.</p>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -132,21 +139,10 @@ const ProfilePage = ({ navigateTo }) => {
           >
             My Profile
           </motion.h2>
-          <motion.div
-            variants={itemVariants}
-            className="bg-white/10 backdrop-blur-md p-3 rounded-lg shadow-lg text-center min-w-[120px]"
-          >
-            <div className="flex items-center justify-center text-sm text-cyan-300 mb-1">
-              <Clock className="w-4 h-4 mr-2" />
-              Time in Area
-            </div>
-            <div className="text-2xl font-bold text-white">
-              {formatTime(timeLeft)}
-            </div>
-            {timeLeft === 0 && (
-              <p className="text-xs text-red-400 mt-1">Time's up!</p>
-            )}
-          </motion.div>
+          <div className="flex gap-2">
+            {parent.children?.length &&
+              parent.children.map((child) => <Timer childData={child} />)}
+          </div>
         </div>
         <motion.section
           variants={itemVariants}
@@ -298,6 +294,34 @@ const ProfilePage = ({ navigateTo }) => {
             </strong>
             , above safety threshold of{" "}
             {process.env.REACT_APP_TEMPERATURE_ALERT_THRESHOLD}°C.
+          </p>
+          <p className="text-md text-gray-300 mb-6">
+            Please check the environment immediately.
+          </p>
+          <Button
+            onClick={() => setIsTemperatureAlertOpen(false)}
+            className="bg-red-500 hover:bg-red-600 text-white px-6 py-2"
+          >
+            Acknowledge
+          </Button>
+        </div>
+      </Modal>
+      <Modal
+        isOpen={isMQTAlertOpen}
+        onClose={() => setIsMQTAlertOpen(false)}
+        title={
+          <span className="flex items-center text-red-400">
+            <AlertTriangle className="w-7 h-7 mr-3" />
+            Air Quality Alert!
+          </span>
+        }
+      >
+        <div className="text-center">
+          <p className="text-lg text-gray-200 mb-2">
+            Current Air Quality is{" "}
+            <strong className="text-red-400">{environmentalData.mq2}°C</strong>,
+            above safety threshold of{" "}
+            {process.env.REACT_APP_MQT_ALERT_THRESHOLD}.
           </p>
           <p className="text-md text-gray-300 mb-6">
             Please check the environment immediately.

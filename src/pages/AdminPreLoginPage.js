@@ -6,7 +6,7 @@ import { itemVariants, pageTransitionVariants } from '../animations/variants';
 import { ShieldAlert, KeyRound, Home } from 'lucide-react';
 
 const AdminPreLoginPage = ({ navigateTo }) => {
-    const handleProceedToAdminLogin = () => navigateTo('adminDashboard');
+    const handleProceedToAdminLogin = () => navigateTo('login?isAdmin=true');
     return (
         <motion.div
             key="adminPreLoginPage" variants={pageTransitionVariants} initial="initial" animate="animate" exit="exit"
