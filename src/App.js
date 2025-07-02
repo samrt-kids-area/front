@@ -115,15 +115,6 @@ const KidSecureApp = () => {
     navigate(`/${page}`);
   };
 
-  /* const showHeader = ![
-    "profile",
-    "liveFeed",
-    "adminPreLogin",
-    "adminDashboard",
-    "addChild",
-  ].includes(currentPage); */
-  /* const showFooter = currentPage === "overview"; */
-
   const handleNavLinkClick = (e, linkHref) => {
     const currentPage = location.pathname.replace("/", "") || "overview";
     if (currentPage !== "overview") {
@@ -237,20 +228,26 @@ const KidSecureApp = () => {
                 {link.text}
               </Link>
             ))}
-            <Button
-              onClick={() => navigateTo("login")}
-              className="mt-4 bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg hover:shadow-blue-500/50 hover:scale-105 transition-all duration-300 text-lg px-8 py-3 flex items-center justify-center gap-3 rounded-lg"
-            >
-              <KeyRound className="w-6 h-6" />
-              Login / Register
-            </Button>
-            <Button
-              onClick={() => navigateTo("adminPreLogin")}
-              className="mt-4 bg-gradient-to-r from-yellow-500 to-orange-500 text-white shadow-lg hover:shadow-yellow-500/50 hover:scale-105 transition-all duration-300 text-lg px-8 py-3 flex items-center justify-center gap-3 rounded-lg"
-            >
-              <UserCog className="w-6 h-6" />
-              Admin Panel
-            </Button>
+            {isAuthenticatedUser || isAuthenticatedParent ? (
+              ""
+            ) : (
+              <>
+                <Button
+                  onClick={() => navigateTo("login")}
+                  className="mt-4 bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg hover:shadow-blue-500/50 hover:scale-105 transition-all duration-300 text-lg px-8 py-3 flex items-center justify-center gap-3 rounded-lg"
+                >
+                  <KeyRound className="w-6 h-6" />
+                  Login / Register
+                </Button>
+                <Button
+                  onClick={() => navigateTo("adminPreLogin")}
+                  className="mt-4 bg-gradient-to-r from-yellow-500 to-orange-500 text-white shadow-lg hover:shadow-yellow-500/50 hover:scale-105 transition-all duration-300 text-lg px-8 py-3 flex items-center justify-center gap-3 rounded-lg"
+                >
+                  <UserCog className="w-6 h-6" />
+                  Admin Panel
+                </Button>
+              </>
+            )}
           </nav>
         </motion.div>
       )}

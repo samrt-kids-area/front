@@ -39,7 +39,7 @@ const ProfilePage = ({ navigateTo }) => {
   });
 
   useEffect(() => {
-    const ws = new WebSocket(process.env.REACT_APP_API_URL);
+    const ws = new WebSocket(process.env.REACT_APP_WEBSOCKET_URL);
 
     ws.onmessage = (event) => {
       const incomingData = JSON.parse(event.data);

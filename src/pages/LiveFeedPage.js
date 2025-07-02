@@ -1,5 +1,5 @@
 // src/pages/LiveFeedPage.js
-import React from "react";
+import React, { useEffect } from "react";
 import { motion } from "framer-motion";
 import Button from "../components/Button";
 import { itemVariants, pageTransitionVariants } from "../animations/variants";
@@ -8,6 +8,14 @@ import { useSelector } from "react-redux";
 
 const LiveFeedPage = ({ navigateTo }) => {
   const { parent } = useSelector((state) => state.parent);
+  const [liveFeedChild, setLiveFeedChild] = React.useState(null);
+
+  useEffect(() => {
+    if (parent?.children.length > 0) {
+      setLiveFeedChild(parent.children[0]);
+    }
+  }, [parent]);
+
   return (
     <motion.div
       key="liveFeedPage"
@@ -23,13 +31,47 @@ const LiveFeedPage = ({ navigateTo }) => {
       >
         Live Feed
       </motion.h2>
+      {parent && parent.children.length > 0 && (
+        <div>
+          <label className="block text-sm font-medium text-gray-200 mb-2">
+            Select Child(ren)
+          </label>
+          <div className="space-y-2 max-h-40 overflow-y-auto p-2 border border-gray-600 rounded-md">
+            {parent.children.map((child) => (
+              <div key={child._id} className="flex items-center">
+                <input
+                  type="checkbox"
+                  id={`child-entry-${child._id}`}
+                  checked={liveFeedChild && liveFeedChild._id === child._id}
+                  onChange={() => {
+                    setLiveFeedChild(child);
+                  }}
+                  onClick={(e) => e.stopPropagation()}
+                  className="h-4 w-4 rounded border-gray-500 text-green-600 focus:ring-green-500 bg-gray-700"
+                />
+                <label
+                  htmlFor={`child-entry-${child._id}`}
+                  className="ml-2 text-sm text-gray-100 flex items-center"
+                >
+                  <img
+                    src={child.photo || "/default-avatar.png"}
+                    alt={child.name}
+                    className="w-8 h-8 rounded-full mr-2"
+                  />
+                  {child.name}
+                </label>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
       <motion.div
         variants={itemVariants}
         className="w-full max-w-3xl aspect-video bg-black/50 backdrop-blur-sm rounded-xl shadow-2xl mb-8 flex items-center justify-center border border-gray-700"
       >
         <img
           src={`${process.env.REACT_APP_STREAM_IP}/video_feed?target_name=${
-            parent?.children.length > 0 ? parent?.children[0]?.name : ""
+            liveFeedChild ? liveFeedChild.name : ""
           }`}
           alt="Live Stream"
           style={{

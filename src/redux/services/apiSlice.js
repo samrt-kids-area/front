@@ -165,6 +165,12 @@ export const apiSlice = createApi({
         method: "POST",
       }),
     }),
+    deleteAdmin: builder.mutation({
+      query: (id) => ({
+        url: `/api/admin/delete-admin/${id}`,
+        method: "DELETE",
+      }),
+    }),
   }),
 });
 
@@ -190,4 +196,5 @@ export const {
   useGetAllAdminsQuery,
   useCheckinChildMutation,
   useCheckoutChildMutation,
+  useDeleteAdminMutation,
 } = apiSlice;

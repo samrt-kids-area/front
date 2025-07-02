@@ -101,31 +101,23 @@ const AddChildPage = ({ navigateTo, context }) => {
 
     setIsLoadingParent(true);
     try {
-      const registerForm = new FormData();
-      registerForm.append("image", imageSrc ? imageBlob : null); // Use Blob for image
-      registerForm.append("childName", childName); // تأكد أن "name" موجود في الفورم
-      registerForm.append(
-        "parentId",
-        defaultParentId ? defaultParentId : parent._id
-      );
-
-
+      const registerForm = new F
       const resData = await axios.post(
-  `${process.env.REACT_APP_BASE_URL_REGISTER_CHILD}/register-child`,
+  `${process.env.REACT_APP_BASE_URL}/children/create-child/${defaultParentId ? defaultParentId : parent._id}`,
   registerForm,
   {
     headers: {
       "Content-Type": "multipart/form-data",
       Authorization: `Bearer ${localStorage.getItem("token")}`,
-    },
-  }
-);
+      },
+     }
+  );
 
 
       const formData = new FormData();
       formData.append("name", childName);
       formData.append("photo", imageSrc ? imageBlob : null); // Strip the data URL prefix
-      formData.append("encoding", JSON.stringify(resData.data.data.encoding));
+      formData.append("encoding", JSON.parse(resData.data.data));
 
       const resPhoto = await addChildren({
         body: formData,

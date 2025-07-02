@@ -31,6 +31,13 @@ const RegisterPage = ({ navigateTo }) => {
   });
 
   const onSubmit = async (data) => {
+    const isValidEmail = /^[\w.-]+@[a-zA-Z0-9-]+\.[a-zA-Z]{2,}$/.test(
+      data.email
+    );
+    if (!isValidEmail) return toast.error("Invalid email format");
+    const isValidPhone = /^01[0125][0-9]{8}$/.test(data.phone);
+    if (!isValidPhone) return toast.error("Invalid phone number format");
+
     const formData = new FormData();
     Object.keys(data).forEach((key) => {
       formData.append(key, data[key]);

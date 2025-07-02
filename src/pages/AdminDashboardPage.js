@@ -25,6 +25,7 @@ import {
   useAddParentMutation,
   useCheckinChildMutation,
   useCheckoutChildMutation,
+  useDeleteParentMutation,
   useGetAllChildrenQuery,
   useGetAllParentsQuery,
 } from "../redux/services/apiSlice"; // Adjust the import path as necessary
@@ -49,8 +50,9 @@ const AdminDashboardPage = ({ navigateTo }) => {
   });
   const [isChildEntryModalOpen, setIsChildEntryModalOpen] = useState(false);
   const [selectedParentForEntry, setSelectedParentForEntry] = useState("");
+  const [selectedParent, setSelectedParent] = useState("");
   const [selectedChildrenForEntry, setSelectedChildrenForEntry] = useState([]);
-  const [entryTimePeriod, setEntryTimePeriod] = useState("30");
+  const [entryTimePeriod, setEntryTimePeriod] = useState("1");
   const [employees, setEmployees] = useState([
     {
       id: "e1",
@@ -91,6 +93,8 @@ const AdminDashboardPage = ({ navigateTo }) => {
     useGetAllParentsQuery("search=");
   const { data: childrenData, refetch: refetchChildren } =
     useGetAllChildrenQuery("search=");
+  const [deleteParent, { isLoading: isLoadingDeleteParent }] =
+    useDeleteParentMutation();
 
   useEffect(() => {
     if (isSidebarOpen && window.innerWidth < 768) {
@@ -271,6 +275,17 @@ const AdminDashboardPage = ({ navigateTo }) => {
     }, // Keep opacity 1 for smoother slide with bg
   };
 
+  const handleDeleteParent = async (e) => {
+    e.preventDefault();
+    try {
+      await deleteParent(selectedParent._id);
+      toast.success("Parent deleted successfully.");
+      setSelectedParent(false);
+    } catch (e) {
+      toast.error("Failed to delete parent.");
+    }
+  };
+
   const sidebarDesktopVariants = {
     open: {
       width: "20%",
@@ -320,10 +335,21 @@ const AdminDashboardPage = ({ navigateTo }) => {
       name: "",
       email: "",
       password: "",
+      nationalId: "",
     },
   });
 
   const onSubmitAdmin = async (data) => {
+    const isValidEmail = /^[\w.-]+@[a-zA-Z0-9-]+\.[a-zA-Z]{2,}$/.test(
+      data.email
+    );
+    if (!isValidEmail) return toast.error("Invalid email format");
+    const isValidNationalId =
+      /^[23][0-9]{2}(0[1-9]|1[0-2])(0[1-9]|[12][0-9]|3[01])[0-9]{7}$/.test(
+        data.nationalId
+      );
+    if (!isValidNationalId) return toast.error("Invalid national ID format");
+
     const res = await addAdmin(data);
     if ("data" in res) {
       toast.success("Employee added successfully");
@@ -588,14 +614,25 @@ const AdminDashboardPage = ({ navigateTo }) => {
                           </p>
                         )}
                       </div>
-                      <Button
-                        onClick={() =>
-                          navigate("/addChild/?parentId=" + parent._id)
-                        }
-                        className="bg-purple-500 hover:bg-purple-600 text-white text-xs px-3 py-1 rounded-md flex items-center gap-1"
-                      >
-                        <UserPlus className="w-3 h-3" /> Add Child
-                      </Button>
+                      <div className="flex flex-col gap-3">
+                        <Button
+                          onClick={() =>
+                            navigate("/addChild/?parentId=" + parent._id)
+                          }
+                          className="bg-purple-500 hover:bg-purple-600 text-white text-xs px-3 py-1 rounded-md flex items-center gap-1"
+                        >
+                          <UserPlus className="w-3 h-3" /> Add Child
+                        </Button>
+                        <Button
+                          onClick={() => {
+                            setSelectedParent(parent);
+                          }}
+                          className="bg-red-500 hover:bg-red-600 text-white text-xs px-3 py-1 rounded-md flex items-center gap-1"
+                        >
+                          <XIcon className="w-3 h-3" />
+                          Delete Parent
+                        </Button>
+                      </div>
                     </div>
                     {parent.children.length > 0 ? (
                       <ul className="list-disc list-inside pl-2 space-y-1">
@@ -891,6 +928,23 @@ const AdminDashboardPage = ({ navigateTo }) => {
                 {...registerAdmin("password", { required: true })} // Using react-hook-form
               />
             </div>
+            <div>
+              <label
+                htmlFor="employeeName"
+                className="block text-sm font-medium text-gray-200 mb-1"
+              >
+                National ID
+              </label>
+              <input
+                type="text"
+                name="nationalId"
+                id="employeeNationalId"
+                required
+                className="block w-full rounded-md border-gray-600 bg-gray-700/50 p-3 text-white shadow-sm focus:border-sky-500 focus:ring-sky-500 sm:text-sm"
+                placeholder="Employee's National ID"
+                {...registerAdmin("nationalId", { required: true })}
+              />
+            </div>
 
             <div className="flex justify-end gap-3 pt-2">
               <Button
@@ -970,6 +1024,36 @@ const AdminDashboardPage = ({ navigateTo }) => {
             </div>
           </div>
         )}
+      </Modal>
+
+      <Modal
+        isOpen={selectedParent}
+        onClose={() => setSelectedParent(false)}
+        title="Delete Parent"
+      >
+        {
+          <form onSubmit={handleDeleteParent} className="space-y-4">
+            <p className="text-gray-300">
+              Are you sure you want to delete this parent? This action cannot be
+              undone.
+            </p>
+            <div className="flex justify-end space-x-4">
+              <Button
+                type="button"
+                onClick={() => setSelectedParent(false)}
+                className="bg-gray-500 text-white hover:bg-gray-600 transition-all duration-300"
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                className="bg-red-500 text-white hover:bg-red-600 transition-all duration-300"
+              >
+                {isLoadingDeleteParent ? "Deleting..." : "Delete Parent"}
+              </Button>
+            </div>
+          </form>
+        }
       </Modal>
     </>
   );
