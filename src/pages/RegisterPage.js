@@ -46,8 +46,8 @@ const RegisterPage = ({ navigateTo }) => {
     if ("data" in res) {
       setSuccessAddingParent(true);
       setParentData(res.data);
-      toast.success("Parent added successfully");
-      navigateTo("login");
+      toast.success(res.data.message);
+      navigateTo("");
     }
     if ("error" in res) {
       toast.error(res.error.data.message);

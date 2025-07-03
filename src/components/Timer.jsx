@@ -5,9 +5,9 @@ import { itemVariants } from "../animations/variants";
 
 const Timer = ({ childData }) => {
   const [timeLeft, setTimeLeft] = useState(0);
-
+  console.log(childData);
   useEffect(() => {
-    if (!childData?.entryTime || !childData?.duration) return;
+    if (!childData?.isInside) return;
 
     const entry = new Date(childData.entryTime);
     const endTime = new Date(entry.getTime() + childData.duration * 60000);

@@ -56,6 +56,12 @@ export const apiSlice = createApi({
         method: "GET",
       }),
     }),
+    verifiyParent: builder.query({
+      query: (q) => ({
+        url: `/api/parent/verify/email/${q}`,
+        method: "GET",
+      }),
+    }),
 
     getAllParents: builder.query({
       query: (q) => ({
@@ -197,4 +203,5 @@ export const {
   useCheckinChildMutation,
   useCheckoutChildMutation,
   useDeleteAdminMutation,
+  useVerifiyParentQuery,
 } = apiSlice;

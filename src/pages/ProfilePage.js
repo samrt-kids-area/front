@@ -20,6 +20,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { logout } from "../redux/feature/userSlice";
 import { logoutParent } from "../redux/feature/parentSlice";
 import Timer from "../components/Timer";
+import { Navigate } from "react-router-dom";
 
 const ProfilePage = ({ navigateTo }) => {
   const [timeLeft, setTimeLeft] = useState(15 * 60);
@@ -115,11 +116,7 @@ const ProfilePage = ({ navigateTo }) => {
     );
   }
   if (!parent) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <p className="text-gray-300">No parent data found.</p>
-      </div>
-    );
+    return <Navigate to="/login" replace={true} />;
   }
 
   return (

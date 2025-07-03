@@ -41,6 +41,7 @@ import {
   useNavigate,
 } from "react-router-dom";
 import { logoutParent, setParent } from "./redux/feature/parentSlice";
+import VerifiedParentEmail from "./components/VerifiedParentEmail";
 
 const navLinks = [
   { id: "about", text: "About", icon: Info, href: "#about-section" },
@@ -288,6 +289,8 @@ const KidSecureApp = () => {
           element={<ViewEmployeesPage navigateTo={navigateTo} />}
         />
         <Route path="/verify/:id" element={<VerifiedEmail />} />
+        <Route path="/verify-parent/:id" element={<VerifiedParentEmail />} />
+
         {/* Add more routes as needed */}
         <Route path="*" element={<OverviewPage navigateTo={navigateTo} />} />
       </Routes>
